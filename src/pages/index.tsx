@@ -2,10 +2,23 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+// Define types for repo and result
+interface Repo {
+  name: string;
+  url: string;
+  description?: string;
+  topics?: string[];
+}
+
+interface SearchResult {
+  score: number;
+  repo: Repo;
+}
+
 export default function RepoSearch() {
   const [query, setQuery] = useState("");
   const [repoUrl, setRepoUrl] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [indexing, setIndexing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +36,9 @@ export default function RepoSearch() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Search failed");
       setResults(json.results || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -43,8 +57,9 @@ export default function RepoSearch() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Ingest failed");
       setIndexStatus(`Indexed repo: ${json.repo}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
     } finally {
       setIndexing(false);
     }

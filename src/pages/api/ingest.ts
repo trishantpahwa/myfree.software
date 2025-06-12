@@ -33,8 +33,9 @@ export default async function handler(
         await upsertRepoToQdrant(id, embedding, metadata);
 
         res.status(200).json({ status: "indexed", repo: metadata.name });
-    } catch (err: any) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
+    } catch (err) {
+        const error = err as Error;
+        console.error(error);
+        res.status(500).json({ error: error.message });
     }
 }
