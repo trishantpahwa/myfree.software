@@ -29,7 +29,9 @@ export async function initCollection(vectorSize: number) {
     console.log(data);
     const collections = data.result?.collections || [];
     console.log("Collections:", collections);
-    const exists = collections.some((col: any) => col.name === COLLECTION);
+    const exists = collections.some(
+        (col: { name: string }) => col.name === COLLECTION
+    );
     console.log(`Collection "${COLLECTION}" exists:`, exists);
     if (exists) return;
 
