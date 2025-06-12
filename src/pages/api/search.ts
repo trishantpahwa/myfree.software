@@ -8,13 +8,18 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const { query } = req.body;
+        const { query, limit = 50, minScore = 0.7 } = req.body; // Accept optional minScore
         if (!query) return res.status(400).json({ error: "Missing query" });
 
         const embedding = await getGeminiEmbedding(query);
-        const results = await searchQdrant(embedding);
+        const results = await searchQdrant(embedding, limit);
 
-        const topResultsText = results
+        // 🔍 Filter results by score threshold
+        const filteredResults = results.filter(
+            (r: { score: number }) => r.score >= minScore
+        );
+
+        const topResultsText = filteredResults
             .map(
                 (
                     r: { payload: { name: string; description?: string } },
@@ -33,12 +38,12 @@ Here are the most relevant GitHub repositories:
 ${topResultsText}
 
 Give a helpful summary of what this user may be looking for and which repo is most useful.
-        `);
+    `);
 
         res.status(200).json({
             query,
             summary,
-            results: results.map(
+            results: filteredResults.map(
                 (r: {
                     score: number;
                     payload: {
