@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/router";
 
 // Define types for repo and result
 interface Repo {
@@ -15,7 +16,10 @@ interface SearchResult {
   repo: Repo;
 }
 
-export default function RepoSearch() {
+export default function Home() {
+
+  const router = useRouter();
+
   const [query, setQuery] = useState("");
   const [repoUrl, setRepoUrl] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -23,6 +27,11 @@ export default function RepoSearch() {
   const [indexing, setIndexing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [indexStatus, setIndexStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) router.push("/login");
+  }, []);
 
   async function handleSearch() {
     setLoading(true);
