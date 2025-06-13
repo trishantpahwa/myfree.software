@@ -4,12 +4,13 @@ import { getGeminiEmbedding, getGeminiResponse } from "@/lib/embedding-gemini";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse
+    request: NextApiRequest,
+    response: NextApiResponse
 ) {
     try {
-        const { query, limit = 50, minScore = 0.7 } = req.body; // Accept optional minScore
-        if (!query) return res.status(400).json({ error: "Missing query" });
+        const { query, limit = 50, minScore = 0.7 } = request.body; // Accept optional minScore
+        if (!query)
+            return response.status(400).json({ error: "Missing query" });
 
         const embedding = await getGeminiEmbedding(query);
         const results = await searchQdrant(embedding, limit);
@@ -40,7 +41,7 @@ ${topResultsText}
 Give a helpful summary of what this user may be looking for and which repo is most useful.
     `);
 
-        res.status(200).json({
+        return response.status(200).json({
             query,
             summary,
             results: filteredResults.map(
@@ -66,6 +67,6 @@ Give a helpful summary of what this user may be looking for and which repo is mo
     } catch (err) {
         const error = err as Error;
         console.error(error);
-        res.status(500).json({ error: error.message });
+        return response.status(500).json({ error: error.message });
     }
 }

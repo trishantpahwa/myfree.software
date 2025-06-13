@@ -8,13 +8,13 @@ import { fetchGitHubRepoWithCode } from "@/lib/github";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse
+    request: NextApiRequest,
+    response: NextApiResponse
 ) {
     try {
-        const { repoUrl } = req.body;
+        const { repoUrl } = request.body;
         if (!repoUrl)
-            return res.status(400).json({ error: "repoUrl is required" });
+            return response.status(400).json({ error: "repoUrl is required" });
 
         const { metadata } = await fetchGitHubRepoWithCode(repoUrl);
 
@@ -32,10 +32,12 @@ export default async function handler(
         const id = toUUIDv5FromURL(repoUrl);
         await upsertRepoToQdrant(id, embedding, metadata);
 
-        res.status(200).json({ status: "indexed", repo: metadata.name });
+        return response
+            .status(200)
+            .json({ status: "indexed", repo: metadata.name });
     } catch (err) {
         const error = err as Error;
         console.error(error);
-        res.status(500).json({ error: error.message });
+        return response.status(500).json({ error: error.message });
     }
 }
