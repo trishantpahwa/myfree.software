@@ -14,7 +14,7 @@ export default async function handler(
     }
 
     try {
-        let allRepositories: any[] = [];
+        let allRepositories: unknown[] = [];
         let page = 1;
         const perPage = 100; // GitHub's maximum per page
 
