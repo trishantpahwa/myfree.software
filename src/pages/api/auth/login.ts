@@ -32,8 +32,18 @@ export default async function handler(
 
         const data = await _response.json();
 
+        const userResponse = await fetch(`https://api.github.com/user`, {
+            headers: {
+                Authorization: `Bearer ${data.access_token}`,
+                Accept: "application/vnd.github.v3+json",
+            },
+        });
+        const userData = await userResponse.json();
+
         if (_response.ok) {
-            return response.status(200).json({ token: data.access_token });
+            return response
+                .status(200)
+                .json({ token: data.access_token, user: userData });
         } else {
             return response.status(400).json({ error: data.error });
         }
