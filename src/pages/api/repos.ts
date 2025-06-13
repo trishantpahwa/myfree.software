@@ -14,22 +14,44 @@ export default async function handler(
     }
 
     try {
-        const _response = await fetch("https://api.github.com/user/repos", {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: "application/vnd.github.v3+json",
-            },
-        });
+        let allRepositories: any[] = [];
+        let page = 1;
+        const perPage = 100; // GitHub's maximum per page
 
-        if (!_response.ok) {
-            const errorData = await _response.json();
-            return response
-                .status(_response.status)
-                .json({ error: errorData.message });
+        while (true) {
+            const _response = await fetch(
+                `https://api.github.com/user/repos?page=${page}&per_page=${perPage}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/vnd.github.v3+json",
+                    },
+                }
+            );
+
+            if (!_response.ok) {
+                const errorData = await _response.json();
+                return response
+                    .status(_response.status)
+                    .json({ error: errorData.message });
+            }
+
+            const repositories = await _response.json();
+
+            if (repositories.length === 0) {
+                break; // No more repositories
+            }
+
+            allRepositories = allRepositories.concat(repositories);
+
+            if (repositories.length < perPage) {
+                break; // Last page reached
+            }
+
+            page++;
         }
 
-        const repositories = await _response.json();
-        return response.status(200).json(repositories);
+        return response.status(200).json(allRepositories);
     } catch (error) {
         console.error("Error fetching repositories:", error);
         return response.status(500).json({ error: "Internal Server Error" });
