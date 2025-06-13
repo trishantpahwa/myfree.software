@@ -82,7 +82,6 @@ export default function Home() {
         body: JSON.stringify({ repoUrl: url }),
       });
       const json = await res.json();
-      alert(JSON.stringify(json, null, 2));
       if (!res.ok) throw new Error(json.error || "Ingest failed");
       else toast.success("Repository indexed successfully!");
     } catch (err) {
